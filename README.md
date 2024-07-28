@@ -1,4 +1,4 @@
-== Vector DB
+# Vector DB
 
 - We could use a library such as FAISS. That would allow us to use a framework like HuggingFace. But the task explicitly asked for and listed DBs
 - Chroma is simple to use and sufficient for demo purposes
@@ -8,12 +8,12 @@
 - OpenAI's Assistants API provides a vector store which performs well[7], but for now it stores up to 10,000 files
 
 
-== Chunking
+# Chunking
 
 - We could use a chunking library such as Unstructured[6]. But it seems this exercise is to do our own chunking.
 - Paragraphs and sentences are more semantically coherent than fixed-size chunks. Sentences may contain too little context.
 
-== Embedding and model
+# Embedding and model
 - The first data file's chunks add up to 1291381114 chars (696 chars/chunk). The dataset contains 28 * 50K PubMed articles. At about 4 chars/token[4], that is 174 tokens/chunk.
 -- Stats for the whole dataset:
 --- Total chars: 33458664792
@@ -25,7 +25,7 @@
 - I wish we could parse metadata, such as the year or authors but that is too hard to do using simple tools and too expensive and/or slow using a language model.
 
 
-== TODO
+# TODO
 
 - Create a Github or Gitlab project
 ✓ Install vector DB
@@ -37,7 +37,7 @@
 - Tune result set size for context window
 
 
-== References
+# References
 
 [1] https://ann-benchmarks.com
 [2] https://zackproser.com/blog/vector-databases-compared#performance-and-benchmarking
