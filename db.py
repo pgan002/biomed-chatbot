@@ -8,9 +8,9 @@ from chromadb.utils import embedding_functions
 #from datasets import load_dataset
 
 DATASET_ID = 'TaylorAI/pubmed_noncommercial'
-VECTOR_DB_NAME = 'pubmed_noncommercial'
+VECTOR_DB_NAME = 'pubmed-noncommercial'
 EMBEDDING_MODEL_NAME = 'text-embedding-3-small'
-OPENAI_API_KEY = ''
+OPENAI_API_KEY = None
 CHUNK_MAX_CHARS = 4 * 8191
 CHINK_MIN_CHARS = 80
 CONTEXT_NUM_DOCS = 15
@@ -18,9 +18,11 @@ CHUNK_AVERAGE_NUM_TOKENS = 174
 
 
 def clean_and_chunk(text: str, doc_ix: int, doc_id: str) -> List[str]:
+    if text.count('\\n') / len(text) > 1/200:
+        text = text.replace('\\n', '\n')
     parts = text.split('\n==== Body\n')
     if len(parts) >= 2:
-        body = parts[1]
+        body = parts[1].strip()
         #regex = re.compile(r'==== Body\n(.*)\n=== Refs')
         # Parsing using `re` might be faster, but this is simpler
         body = body.split('\n==== ')[0]
@@ -45,7 +47,7 @@ class DB:
             api_key=OPENAI_API_KEY,
             model_name=EMBEDDING_MODEL_NAME,
         )
-        if self.client.get_collection(name=VECTOR_DB_NAME):
+        if any(VECTOR_DB_NAME == c.name for c in self.client.list_collections()):
             self.client.delete_collection(name=VECTOR_DB_NAME)
         collection = self.client.create_collection(
             name=VECTOR_DB_NAME,
@@ -62,11 +64,11 @@ class DB:
                     print(f'File: {file_ix}, doc: {doc_ix} id: {doc_id}', end='\r')
                     text = d['text']
                     chunks = clean_and_chunk(text, doc_ix, doc_id)
-                    
                     tot_len += len(''.join(chunks))
                     num_chunks += len(chunks)
-                    ids = [f'{doc_id}_{i}' for i in range(len(chunks))]
-                    #collection.add(documents=[text], ids=ids)
+                    if chunks:
+                        ids = [f'{doc_id}_{i}' for i in range(len(chunks))]
+                        #collection.add(documents=chunks, ids=ids)
         print()
         print('Total chars:', tot_len)
         print('Chunks:', num_chunks)
