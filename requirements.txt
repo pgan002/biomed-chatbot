@@ -1,0 +1,4 @@
+datasets
+chromadb
+nltk
+openai

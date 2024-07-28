@@ -1,0 +1,5 @@
+venv/
+*.pyc
+chroma/
+data/
+data_zip/
