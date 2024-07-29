@@ -5,12 +5,9 @@ from typing import List
 
 import chromadb
 from chromadb.utils import embedding_functions
-#from datasets import load_dataset
 
 DATASET_ID = 'TaylorAI/pubmed_noncommercial'
 VECTOR_DB_NAME = 'pubmed-noncommercial'
-EMBEDDING_MODEL_NAME = 'text-embedding-3-small'
-OPENAI_API_KEY = None
 CHUNK_MAX_CHARS = 4 * 8191
 CHINK_MIN_CHARS = 80
 CONTEXT_NUM_DOCS = 15
@@ -42,16 +39,10 @@ class DB:
         #dataset = load_dataset(DATASET_ID)
         # We would normally use this, but downloading takes long and 
         # I already downloaded the files using HTTP so use those instead
-
-        embedding_function = embedding_functions.OpenAIEmbeddingFunction(
-            api_key=OPENAI_API_KEY,
-            model_name=EMBEDDING_MODEL_NAME,
-        )
         if any(VECTOR_DB_NAME == c.name for c in self.client.list_collections()):
             self.client.delete_collection(name=VECTOR_DB_NAME)
         collection = self.client.create_collection(
             name=VECTOR_DB_NAME,
-            embedding_function=embedding_function
         )
         path = Path(self.data_dir_path)
         tot_len = 0
@@ -67,21 +58,22 @@ class DB:
                     tot_len += len(''.join(chunks))
                     num_chunks += len(chunks)
                     if chunks:
-                        ids = [f'{doc_id}_{i}' for i in range(len(chunks))]
-                        #collection.add(documents=chunks, ids=ids)
+                        ids = [f'{doc_id}.{i}' for i in range(len(chunks))]
+                        collection.add(documents=chunks, ids=ids)
         print()
         print('Total chars:', tot_len)
         print('Chunks:', num_chunks)
         print('Tokens/chunk:', round(tot_len / num_chunks / 4), '(assuming 4 chars/token)')
 
-    def ingest_or_get_collection(self):
+    def get_or_ingest_collection(self):
         try:
-            self.client.get_collection(name=self.dataset_id)
+            return self.client.get_collection(name=VECTOR_DB_NAME)
         except ValueError:
             self.ingest_overwrite()
-
+            return self.client.get_collection(name=VECTOR_DB_NAME)
+    
     def query(self, text: str, n_results: int):
-        collection = self.ingest_or_get_collection()
+        collection = self.get_or_ingest_collection()
         return collection.query(query_texts=[text], n_results=n_results)
 
 
