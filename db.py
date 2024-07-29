@@ -6,6 +6,7 @@ from typing import List
 import chromadb
 from chromadb.utils import embedding_functions
 
+
 DATASET_ID = 'TaylorAI/pubmed_noncommercial'
 VECTOR_DB_NAME = 'pubmed-noncommercial'
 CHUNK_MAX_CHARS = 4 * 8191
