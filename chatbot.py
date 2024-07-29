@@ -1,44 +1,48 @@
-import os
-
 from openai import OpenAI
 
-from db import DB, CHUNK_AVERAGE_NUM_TOKENS
+from db import DB
 
 
 MODEL_NAME = 'gpt-4o-mini'
 OPENAI_API_KEY = ''
-#MODEL_CONTEXT_WINDOW = 128_000
 NUM_RETREIVAL_RESULTS = 50
-MODEL_PROMPT = """You are a biomedical scientist.
-Find the answer to the question below using only the context after the question.
-In your  answer, also quote the most relevant paragraphs from the context which
-you used to answer the question. If you don't know the answer, say "I do not know".
-Don't make up an answer."""
+MODEL_PROMPT_TEMPLATE = """You are a biomedical scientist.
+Answer the question below using the information contained after the heading "Context:". Also quote the most relevant parts of the context which you used to answer the question. If you don't know the answer, say "I do not know".
+
+Context:
+
+{context}
+"""
 
 
 if __name__ == '__main__':
     db = DB()
-    cleint = OpenAI()
-    assistant = client.beta.assistants.create(
-        name='PubMed biomedical scientist',
-        instructions=MODEL_PROMPT,
-        model=MODEL_NAME,
-        top_p=0.1,
-    )
-    thread = client.beta.threads.create()
-    print('Type a biomedical question.\n')
-    while True:
-        try:
-            user_query = input(prompt='> ')
-            context_results = db.query(user_query, NUM_RETREIVAL_RESULTS)
-            message = client.beta.threads.messages.create(
-                thread_id=thread.id,
-                role='user',
-                content='\n\n'.join([user_query, *context_results])
+    client = OpenAI()
+    print('Type a biomedical question\n')
+    try:
+        while True:
+            user_query = input('> ')
+            if user_query == '':
+                continue
+            retreival_result = db.query(user_query, NUM_RETREIVAL_RESULTS)
+            context_docs = retreival_result['documents'][0]
+            model_prompt = MODEL_PROMPT_TEMPLATE.format( 
+                context='\n\n'.join(context_docs)
             )
-            run = client.beta.threads.runs.create_and_poll(
-                thread_id=thread.id,
-                assistant_id=assistant.id,
+            response = client.chat.completions.create(
+                model=MODEL_NAME,
+                messages=[
+                    {
+                        'role': 'system',
+                        'content': model_prompt
+                    },
+                    {
+                        'role': 'user',
+                        'content': user_query
+                    }
+                ]
             )
-        except KeyboardInterrupt:
-            print()
+            for c in response.choices:
+                print(c.message.content, '\n')
+    except (KeyboardInterrupt, EOFError):
+        print()
