@@ -24,6 +24,9 @@
 -- The most appropriate model is `gpt-4o-mini`: affordable and intelligent small model. Context size 128K tokens. Pricing: $0.150 /1M input tokens, $0.600 /1M output tokens.
 - I wish we could parse metadata, such as the year or authors but that is too hard to do using simple tools and too expensive and/or slow using a language model.
 
+Local models tend to be faster than web-hosted models due to network latency.[8]
+all-MiniLM-L6-v2  has a good balance between speed and quality. Word embedding models like Glove are fastest.[8]
+
 
 # TODO
 
@@ -46,3 +49,4 @@
 [5] https://openai.com/api/pricing/
 [6] https://unstructured.io/platform
 [7] https://medium.com/@zilliz_learn/openai-rag-vs-your-customized-rag-which-one-is-better-4c65a7c6317b
+[8] https://huggingface.co/blog/mteb
