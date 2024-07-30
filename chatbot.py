@@ -3,7 +3,7 @@ from typing import List, Optional
 
 from openai import OpenAI
 
-from db import VectorDb, ChromaDb, DATASET_ID, NAME as DB_NAME
+from db import AbstractVectorDb, ChromaDb, DATASET_ID, NAME as DB_NAME
 
 
 MODEL_NAME = 'gpt-4o-mini'
@@ -30,7 +30,7 @@ class BiomedRAG(ABC):
 
 
 class OpenAiBiomedRAG(BiomedRAG):
-    def __init__(self, db: VectorDb):
+    def __init__(self, db: AbstractVectorDb):
         self.db = db
         self.client = OpenAI()
 
@@ -53,7 +53,7 @@ class OpenAiBiomedRAG(BiomedRAG):
 
 if __name__ == '__main__':
     db = ChromaDb()
-    rag = OpenAiBiomedRag(db)
+    rag = OpenAiBiomedRAG(db)
     print('Type a biomedical question\n')
     try:
         while True:
