@@ -8,9 +8,9 @@ from db import VectorDb, ChromaDb, DATASET_ID, NAME as DB_NAME
 MODEL_NAME = 'gpt-4o-mini'
 NUM_RETRIEVAL_RESULTS = 50
 MODEL_PROMPT_TEMPLATE = """You are a biomedical scientist.
-Answer the question below using the information contained after the heading "Context:". Also quote the most relevant parts of the context which you used to answer the question. If you don't know the answer, say "I do not know".
+Below some information and a question at the end. The information may be relevant to answering the question. If it is relevant, use it to answer the question and quote the most relevant parts. If none of the information is relevant, say "I cannot find any relevant information" and do not make up an answer.
 
-Context:
+Information:
 
 {context}
 """
