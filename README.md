@@ -26,9 +26,17 @@ To download and ingest data into the database, run
 python db.py
 ```
 
-There are two options for embedding that can be set by coding. See the discussion under section "Embedding".
-- The faster one (Glove) uses about 3.5G during ingestion.
-- The slower and better (`all-MiniLM-L6-v2`) uses less memory and, we implement auto-resume if ingestion is interrupted. 
+There are two options for embedding that can be set by coding.
+- `all-MiniLM-L6-v2`
+-- expected to be better
+-- ingests about 1 document/s
+- `Glove`
+-- 10 ingests about 10 documents/s
+-- Uses about 3.5G memory during ingestion.
+
+See the discussion under section "Embedding".
+
+If ingestion is interrupted and restarted, it knows from which input document to resume.
 
 
 ## Querying the chatbot
@@ -116,17 +124,20 @@ The cheapest and almost as good would be a locally-run `Llama3` model.
 
 # TODO
 
+- Document an example for "What is the effect of sleep on memory?"
 - Tune retrieved set size
 - Tune max distance for retrieval
 - Split only large chunks?
 - Easily configurable LLM, DB and embedding function?
 - Use Llama3 LLM locally
+- Logging instead of print()
+- Unit tests
 
 
 [1]: https://ann-benchmarks.com
 [2]: https://zackproser.com/blog/vector-databases-compared#performance-and-benchmarking
 [3]: https://www.timescale.com/blog/pgvector-is-now-as-fast-as-pinecone-at-75-less-cost/
-[4]: https://help.openai.com/en/articles/4936856-what-are-tokens-and-how-to-count-them 
+[4]: https://help.openai.com/en/articles/4936856-what-are-tokens-and-how-to-count-them
 [5]: https://openai.com/api/pricing/
 [6]: https://unstructured.io/platform
 [7]: https://medium.com/@zilliz_learn/openai-rag-vs-your-customized-rag-which-one-is-better-4c65a7c6317b
