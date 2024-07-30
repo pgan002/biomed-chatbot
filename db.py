@@ -4,9 +4,10 @@ from typing import List, Optional
 
 import chromadb
 import datasets
-import nltk
 
-from glove import Glove
+import data
+from util.glove_embedding_function import GloveEmbeddingFunction
+
 
 DATASET_ID = 'TaylorAI/pubmed_noncommercial'
 #NAME = 'pubmed-noncommercial'
@@ -18,29 +19,6 @@ CHUNK_AVERAGE_NUM_TOKENS = 174
 MIN_DISTANCE = 0.9
 
 nltk.download('punkt')
-
-
-def extract_doc_id(row):
-    return row['file'].split('/')[1].lstrip('PCM').rstrip('.txt')
-
-
-def clean_and_chunk(text: str, doc_ix: int, doc_id: str) -> List[str]:
-    n = text.count('\\n')
-    if n and len(text) // n > 200:
-        text = text.replace('\\n', '\n')
-    parts = text.split('\n==== Body\n')
-    if len(parts) >= 2:
-        body = parts[1].strip()
-        #regex = re.compile(r'==== Body\n(.*)\n=== Refs')
-        # TODO: Parsing using `re` might be slightly faster
-        body = body.split('\n==== ')[0]
-        chunks = body.split('\n\n')
-    else:
-        chunks = [text]
-    chunks = list(chain(*(nltk.tokenize.sent_tokenize(c) for c in chunks)))
-    chunks = [x for x in chunks if len(x) >= CHINK_MIN_CHARS]
-    # TODO: Split or join consecutive chunks depending on size
-    return chunks
 
 
 class VectorDb(ABC):
@@ -69,7 +47,9 @@ class VectorDb(ABC):
 class ChromaDb(VectorDb):
     def __init__(self, name: str = NAME, dataset_id: str = DATASET_ID):
         super().__init__(name, dataset_id)
-        self.client = chromadb.PersistentClient(embedding_function=Glove())
+        self.client = chromadb.PersistentClient(
+            embedding_function=GloveEmbeddingFunction()
+        )
     
     def ingest(self):
         collection = self.client.get_or_create_collection(self.name)
@@ -83,7 +63,7 @@ class ChromaDb(VectorDb):
         ds = datasets.load_dataset(self.dataset_id)['train']
         try:
             for doc_ix, row in enumerate(ds):
-                doc_id = extract_doc_id(row)
+                doc_id = data.extract_document_id(row)
                 if last_doc_ix is None:
                     if doc_id in previously_ingested_ids:
                         continue
@@ -91,8 +71,8 @@ class ChromaDb(VectorDb):
                     if doc_ix <= last_doc_ix:
                         continue
                 print(f'\rIngest "{doc_id}" {doc_ix:,}/{ds.shape[0]:,}', end='')
-                text = row['text']
-                chunks = clean_and_chunk(text, doc_ix, doc_id)
+                text = data.extract_document(row)
+                chunks = data.clean_and_chunk(text)
                 if chunks:
                     total_chars += sum(len(c) for c in chunks)
                     ids = [f'{doc_id}_{i}' for i in range(len(chunks))]
