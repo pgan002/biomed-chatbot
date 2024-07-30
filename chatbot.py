@@ -16,7 +16,7 @@ Information:
 {context}
 """
 
-class BiomedRag(ABC):
+class BiomedRAG(ABC):
     @abstractmethod
     def _query_model(self, prompt: str) -> List[str]:
         pass
@@ -29,7 +29,7 @@ class BiomedRag(ABC):
         return self._query_model(model_prompt)
 
 
-class OpenAiBiomedRAG(BiomedRag):
+class OpenAiBiomedRAG(BiomedRAG):
     def __init__(self, db: VectorDb):
         self.db = db
         self.client = OpenAI()
@@ -52,7 +52,7 @@ class OpenAiBiomedRAG(BiomedRag):
 
 
 if __name__ == '__main__':
-    db = ChromaDb(DB_NAME, dataset_id=DATASET_ID)
+    db = ChromaDb()
     rag = OpenAiBiomedRag(db)
     print('Type a biomedical question\n')
     try:
