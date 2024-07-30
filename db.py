@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 from itertools import chain
-from typing import List, Optional
+from typing import List
 
 import chromadb
 import datasets
@@ -16,9 +16,7 @@ CHINK_MIN_CHARS = 32
 CHUNK_MAX_CHARS = 2048
 CONTEXT_NUM_DOCS = 15
 CHUNK_AVERAGE_NUM_TOKENS = 174
-MIN_DISTANCE = 0.9
-
-nltk.download('punkt')
+MAX_DISTANCE = 0.9
 
 
 class VectorDb(ABC):
@@ -47,12 +45,13 @@ class VectorDb(ABC):
 class ChromaDb(VectorDb):
     def __init__(self, name: str = NAME, dataset_id: str = DATASET_ID):
         super().__init__(name, dataset_id)
-        self.client = chromadb.PersistentClient(
-            embedding_function=GloveEmbeddingFunction()
-        )
+        self.client = chromadb.PersistentClient()
     
     def ingest(self):
-        collection = self.client.get_or_create_collection(self.name)
+        collection = self.client.get_or_create_collection(
+            self.name,
+            embedding_function=GloveEmbeddingFunction()
+        )
         previously_ingested_ids = set(
             s.split('_')[0] 
             for s in collection.get(include=[])['ids']
@@ -106,7 +105,7 @@ class ChromaDb(VectorDb):
     def query(
         self, text: str, 
         max_results: int, 
-        min_distance: float = MIN_DISTANCE
+        max_distance: float = MAX_DISTANCE
     ) -> List[str]:
         collection = self.client.get_collection(name=self.name)
         response = collection.query(query_texts=[text], n_results=max_results)

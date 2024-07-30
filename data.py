@@ -1,4 +1,9 @@
+from typing import List, Optional
+
 import nltk
+
+
+nltk.download('punkt')
 
 
 def extract_document_id(row: dict) -> str:

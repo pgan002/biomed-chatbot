@@ -4,7 +4,7 @@ from chromadb.api.types import (
     Embeddings
 )
 
-from glove import Glove
+from util.glove import Glove
 
 
 class GloveEmbeddingFunction(EmbeddingFunction[Documents]):
