@@ -13,6 +13,8 @@
 
 replacing the actual key in the last line
 
+If you want to use the GloVe embedding (fast) instead of the LLM one (better), download the pre-trained GloVe embedding file from [13].
+
 ## Storing documents
 
 To download and ingest data into the database, run
@@ -67,9 +69,11 @@ Consideraions:
 
 There are many possible embedding functions. ChromaDB predefines some and supports a custom ones.[8] Various benchmarks rank embedding functions[9]. Most of those are large models that will take long. Local models tend to be faster than web-hosted models due to network latency[10].
 
-all-MiniLM-L6-v2  has a good balance between speed and quality. Word embedding models like Glove are fastest.[10]
+all-MiniLM-L6-v2  has a good balance between speed and quality.
 
-To avoid costs, I started with an embedding running locally, namely Sentence Transformers's `all-MiniLM-L6-v2` (ChromaDB's default). Emvedding progressed at 1 document / s, so embedding the whole dataset would take many days. This did not work on my GPU, although other models do use it.
+Word embedding models like Glove are the fastest.[10] but do not take account of the context of words in the document. Specifically GloVe also ignores word order. Thus retrieval will miss important results and include irrelevant results (low recall and precision).
+
+To avoid costs, I started with an embedding running locally, namely Sentence Transformers's `all-MiniLM-L6-v2` (ChromaDB's default). Emvedding progressed at 1 document / s, so embedding the whole dataset would take 16 days. This did not work on my GPU, although other models do use it.
 
 OpenAI's cheapest embedding is `text-embedding-3-small`: 62,500 pages/$, 8191 tokens, $0.02 /1M tokens[5]. Embedding the whole data would cost about $18. Vectorization progressed at about 1 document per second. The cost would be only $9 by batching, that would take up to 24 hours. This is a good option, although I did not use it.
 
@@ -78,23 +82,29 @@ Other AI providers also host embedding models, sometimes cheaper, but no batchin
 Instead, I implemented document embedding via averaged Glove word embeddings.
 
 
+# Retrieval
+
+## Distance metric
+
+Publications find Euclidean distance metric better than cosine distance in ChromaDB[11] and for embeddings in general[12]. This is the default for ChromaDB.
+
+ChromaDb's query() metthod does not offer filtering based on distance but we do it after words.
+
+
 # Model
 
-We start with OpenAI's `gpt-4o-mini`. It is affordable, small and intelligent. Context size 128K tokens. Pricing: $0.150 /1M input tokens, $0.600 /1M output tokens.
+We start with OpenAI's `gpt-4o-mini`. It is the cheapest and smallest among the best models available today. Context size 128K tokens. Pricing: $0.150 /1M input tokens, $0.600 /1M output tokens. Cheap enough for development and demo.
 
-
-# Distance metric
-
-Publishions find that, euclidean distance metric is better than cosine distance for ... embedding in ChromaDB[11] and for embeddings in general[12]. This is the default for ChromaDB.
+The cheapest and almost as good would be a locally-run Llama3 model.
 
 
 # TODO
 
-- Ingest data
-- Code and try GloVe embedding
 - Tune retrieved set size
 - Tune max distance for retrieval
-- Split large chunks
+- Split only large chunks?
+- Easily configurable LLM, DB and embedding function?
+- Use Llama3 LLM
 
 
 # References
@@ -111,3 +121,4 @@ Publishions find that, euclidean distance metric is better than cosine distance 
 [10] https://huggingface.co/blog/mteb
 [11] https://medium.com/@stepkurniawan/comparing-similarity-searches-distance-metrics-in-vector-stores-rag-model-f0b3f7532d6f
 [12] https://arxiv.org/pdf/1803.02839
+[13] https://nlp.stanford.edu/data/glove.840B.300d.zip
