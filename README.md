@@ -61,12 +61,12 @@ Publishions find that, euclidean distance metric is better than cosine distance 
 - Ingest data
 ✓ Pass query to DB
 ✓ Pass retrieved context to model
-- Tune retrieved set size
-- Split large chunks
-- Factor our chatbot class
-- Filter retrieved documents based on distance from query
+✓ Factor out chatbot class
+✓ Filter retrieved documents based on distance from query
 - Document usage
 - Code and try GloVe embedding
+- Tune retrieved set size
+- Split large chunks
 
 
 # References
