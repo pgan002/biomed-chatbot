@@ -117,8 +117,6 @@ The cheapest and almost as good would be a locally-run `Llama3` model.
 - Use Llama3 LLM
 
 
-# References
-
 [1]: https://ann-benchmarks.com
 [2]: https://zackproser.com/blog/vector-databases-compared#performance-and-benchmarking
 [3]: https://www.timescale.com/blog/pgvector-is-now-as-fast-as-pinecone-at-75-less-cost/
