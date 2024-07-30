@@ -48,6 +48,9 @@ Using OpenAI, the cheapest embedding is `text-embedding-3-small`: 62,500 pages/$
 
 We start with OpenAI's `gpt-4o-mini`. It is affordable, small and intelligent. Context size 128K tokens. Pricing: $0.150 /1M input tokens, $0.600 /1M output tokens.
 
+# Distance metric
+
+Publishions find that, euclidean distance metric is better than cosine distance for ... embedding in ChromaDB[11] and for embeddings in general[12]. This is the default for ChromaDB.
 
 # TODO
 
@@ -78,4 +81,5 @@ We start with OpenAI's `gpt-4o-mini`. It is affordable, small and intelligent. C
 [8] https://docs.trychroma.com/guides/embeddings#custom-embedding-functions
 [9] https://huggingface.co/spaces/mteb/leaderboard
 [10] https://huggingface.co/blog/mteb
-
+[11] https://medium.com/@stepkurniawan/comparing-similarity-searches-distance-metrics-in-vector-stores-rag-model-f0b3f7532d6f
+[12] https://arxiv.org/pdf/1803.02839
