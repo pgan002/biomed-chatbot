@@ -5,7 +5,7 @@ import chromadb
 import datasets
 
 import data
-from util.glove_embedding_function import GloveEmbeddingFunction
+from emmbedding_functions.glove import GloveEmbeddingFunction
 
 
 DATASET_ID = 'TaylorAI/pubmed_noncommercial'
