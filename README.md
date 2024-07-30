@@ -1,3 +1,32 @@
+# Usage
+
+## Setup
+
+1. Install python3.10
+1. Run
+    git clone https://github.com/pgan002/chatbot.git
+    cd chatbot
+    python3.10 -m venv venv
+    . venv/bin/activate
+    pip install -r requirements.txt
+    export OPENAI_API_KEY=<key>
+
+replacing the actual key in the last line
+
+## Storing documents
+
+To download and ingest data into the database, run
+    python db.py
+
+There are two options for embedding that can be set by coding. See the discussion under section "Embedding".
+
+
+## Querying the chatbot
+
+After (enough) documents are ingested, start the chatbot by running:
+    python chatbot.py
+
+
 # Data
 
 As suggested in the task description, we use the PubMed articles with a non-commercial license: TaylorAI/pubmed_noncommercial, ~60GB in text.
@@ -36,36 +65,35 @@ Consideraions:
 
 # Embedding
 
-To avoid costs, start with an embedding running locally, namely Sentence Transformers's `all-MiniLM-L6-v2` (ChromaDB's default).
+There are many possible embedding functions. ChromaDB predefines some and supports a custom ones.[8] Various benchmarks rank embedding functions[9]. Most of those are large models that will take long. Local models tend to be faster than web-hosted models due to network latency[10].
 
-There are many options for embedding models. ChromaDB has some predefined ones and supports a custom function that could run locally.[8] There are rankings on various benchmarks[9]. However, those are large models that will take long to embed the data. Local models tend to be faster than web-hosted models due to network latency[10].
 all-MiniLM-L6-v2  has a good balance between speed and quality. Word embedding models like Glove are fastest.[10]
 
+To avoid costs, I started with an embedding running locally, namely Sentence Transformers's `all-MiniLM-L6-v2` (ChromaDB's default). Emvedding progressed at 1 document / s, so embedding the whole dataset would take many days. This did not work on my GPU, although other models do use it.
 
-Using OpenAI, the cheapest embedding is `text-embedding-3-small`: 62,500 pages/$, 8191 tokens, $0.02 /1M tokens[5]. Embedding the whole data would cost about $18. We could halve the cost using batching but that would take up to 24 hours.
+OpenAI's cheapest embedding is `text-embedding-3-small`: 62,500 pages/$, 8191 tokens, $0.02 /1M tokens[5]. Embedding the whole data would cost about $18. Vectorization progressed at about 1 document per second. The cost would be only $9 by batching, that would take up to 24 hours. This is a good option, although I did not use it.
+
+Other AI providers also host embedding models, sometimes cheaper, but no batching.
+
+Instead, I implemented document embedding via averaged Glove word embeddings.
+
 
 # Model
 
 We start with OpenAI's `gpt-4o-mini`. It is affordable, small and intelligent. Context size 128K tokens. Pricing: $0.150 /1M input tokens, $0.600 /1M output tokens.
 
+
 # Distance metric
 
 Publishions find that, euclidean distance metric is better than cosine distance for ... embedding in ChromaDB[11] and for embeddings in general[12]. This is the default for ChromaDB.
 
+
 # TODO
 
-✓ Create a Github or Gitlab project
-✓ Install vector DB
-✓ Download data
-✓ Clean data
 - Ingest data
-✓ Pass query to DB
-✓ Pass retrieved context to model
-✓ Factor out chatbot class
-✓ Filter retrieved documents based on distance from query
-- Document usage
 - Code and try GloVe embedding
 - Tune retrieved set size
+- Tune max distance for retrieval
 - Split large chunks
 
 
