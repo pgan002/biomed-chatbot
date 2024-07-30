@@ -3,6 +3,8 @@ from typing import List
 
 import chromadb
 import datasets
+from chromadb.api.types import EmbeddingFunction
+from chromadb.utils.embedding_functions import DefaultEmbeddingFunction
 
 import data
 from embedding_functions.glove import GloveEmbeddingFunction
@@ -10,16 +12,23 @@ from embedding_functions.glove import GloveEmbeddingFunction
 
 DATASET_ID = 'TaylorAI/pubmed_noncommercial'
 NAME = 'pubmed-noncommercial'
-#NAME = 'test'
 CONTEXT_NUM_DOCS = 15
 MAX_DISTANCE = 0.9
 
 
-class VectorDb(ABC):
-    def __init__(self, name: str = NAME, dataset_id: str = DATASET_ID):
-        print(f'Using {self.__class__.__name__} vector database "{name}"')
-        self.name = NAME
+class AbstractVectorDb(ABC):
+    def __init__(
+        self,
+        name: str = NAME,
+        dataset_id: str = DATASET_ID,
+        embedding_function: EmbeddingFunction = DefaultEmbeddingFunction()
+    ):
+        print(f'Vector DB: {self.__class__.__name__}')
+        print(f'Collection: "{name}"')
+        print(f'Embedding: {embedding_function.__class__.__name__}')
+        self.name = name
         self.dataset_id = dataset_id
+        self.embedding_function= embedding_function
     
     @abstractmethod
     def ingest(self):
@@ -38,15 +47,20 @@ class VectorDb(ABC):
         print(f'Deleting vector database "{self.name}" if it exists')
 
 
-class ChromaDb(VectorDb):
-    def __init__(self, name: str = NAME, dataset_id: str = DATASET_ID):
-        super().__init__(name, dataset_id)
+class ChromaDb(AbstractVectorDb):
+    def __init__(
+        self,
+        name: str = NAME,
+        dataset_id: str = DATASET_ID,
+        embedding_function: EmbeddingFunction = DefaultEmbeddingFunction()
+    ):
+        super().__init__(name, dataset_id, embedding_function)
         self.client = chromadb.PersistentClient()
     
     def ingest(self):
         collection = self.client.get_or_create_collection(
             self.name,
-            #embedding_function=GloveEmbeddingFunction()
+            embedding_function=self.embedding_function
         )
         previously_ingested_ids = set(
             s.split('_')[0] 
@@ -56,34 +70,27 @@ class ChromaDb(VectorDb):
         last_doc_ix = metadata.get('last_doc_ix', -1)
         total_chars = metadata.get('total_chars', 0)
         ds = datasets.load_dataset(self.dataset_id)['train']
-        try:
-            for doc_ix, row in enumerate(ds):
-                doc_id = data.extract_document_id(row)
-                if last_doc_ix is None:
-                    if doc_id in previously_ingested_ids:
-                        continue
-                else:
-                    if doc_ix <= last_doc_ix:
-                        continue
-                print(f'\rIngest "{doc_id}" {doc_ix:,}/{ds.shape[0]:,}', end='')
-                text = data.extract_document(row)
-                chunks = data.clean_and_chunk(text)
-                if chunks:
-                    total_chars += sum(len(c) for c in chunks)
-                    ids = [f'{doc_id}_{i}' for i in range(len(chunks))]
-                    try:
-                        collection.add(documents=chunks, ids=ids)
-                    except TypeError as e:
-                        print(chunks)
-                        raise e
-                    metadata = {
-                        'last_doc_ix': doc_ix, 
-                        'last_doc_id': doc_id, 
-                        'total_chars': total_chars
-                    }
-                    collection.modify(metadata=metadata)
-        except KeyboardInterrupt:
-            pass
+        for doc_ix, row in enumerate(ds):
+            doc_id = data.extract_document_id(row)
+            if last_doc_ix is None:
+                if doc_id in previously_ingested_ids:
+                    continue
+            else:
+                if doc_ix <= last_doc_ix:
+                    continue
+            print(f'\rIngest "{doc_id}" {doc_ix:,}/{ds.shape[0]:,}', end='')
+            text = data.extract_document(row)
+            chunks = data.clean_and_chunk(text)
+            if chunks:
+                total_chars += sum(len(c) for c in chunks)
+                ids = [f'{doc_id}_{i}' for i in range(len(chunks))]
+                collection.add(documents=chunks, ids=ids)
+                metadata = {
+                    'last_doc_ix': doc_ix,
+                    'last_doc_id': doc_id,
+                    'total_chars': total_chars
+                }
+                collection.modify(metadata=metadata)
         n_chunks = collection.count()
         toks_per_chunk = round(total_chars / 4 / n_chunks)
         print('Totals:')
@@ -121,14 +128,22 @@ class ChromaDb(VectorDb):
 
 
 if __name__ == '__main__':
-    db = ChromaDb()
-    last_doc_ix = db.get_last_doc_ix()
-    if last_doc_ix >= 0:
-        print(f'Collection {db.name} last ingested document {last_doc_ix}.')
-        print('Choose:')
-        print(f'[a]ppend, starting at dataset document {1 + last_doc_ix}')
-        print(f'[d]elete (replace) the collection')
-        if input('(a/d)? ').lower() == 'd':
-            db.delete()
-    db.ingest()
-
+    try:
+        embedding_function = GloveEmbeddingFunction()
+        db = ChromaDb('test', embedding_function=embedding_function)
+        last_doc_ix = db.get_last_doc_ix()
+        if last_doc_ix >= 0:
+            print()
+            print(f'Collection "{db.name}" last ingested document {last_doc_ix}.')
+            print('Choose:')
+            print(f'[c]ontinue ingesting, starting from document {1 + last_doc_ix}')
+            print(f'[r]eplace this collection, start ingesting from document 0')
+            while True:
+                response = input('c/r: ').lower()
+                if response in 'cr':
+                    if response == 'r':
+                        db.delete()
+                    break
+        db.ingest()
+    except (KeyboardInterrupt, EOFError):
+        print()
