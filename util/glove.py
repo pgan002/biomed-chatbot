@@ -1,5 +1,8 @@
 from pathlib import Path
+
 import numpy
+
+from downloader import download_unzip
 
 
 EMBEDDING_NAME = 'glove.840B.300d'
