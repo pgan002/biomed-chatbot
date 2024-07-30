@@ -16,7 +16,7 @@ export OPENAI_API_KEY=<key>
 
 replacing the actual key in the last line
 
-If you want to use the GloVe embedding (fast) instead of the LLM one (better), download the pre-trained GloVe embedding file from [13].
+If you want to use the GloVe embedding (fast) instead of the deep (better) one, download the pre-trained GloVe embedding file from [13].
 
 ## Storing documents
 
@@ -48,7 +48,7 @@ Most of the articles are formatted with separate header, body and reference sect
 
 # Cleaning and chunking
 
-When possible, we extract the article bodies and chunk them into paragraphs. Paragraphs and sentences are more semantically coherent than fixed-size chunks, even if those overlap. Sentences may contain too little context. It is difficult to compare results of each because I am not an expert in the application domain, and it would require a lot of work.
+When possible, we extract the article bodies and chunk them into paragraphs. Paragraphs and sentences are more semantically coherent than fixed-size chunks, even if those overlap. Sentences may contain too little context. The optimum chunk size depends on the embedding type, because with simple embeddings such as Glove, large chunks would become too general to be useful. I did not tune the think size because it would require a lot of work and because I cannot evaluate retrieved results (I do not know biomedicine).
 
 About 1000 of the 50,000 documents are not formatted into clear sections or do not have such sections. For these, we use the whole document as a chunk.
 
@@ -98,7 +98,13 @@ Instead, I implemented document embedding via averaged Glove word embeddings.
 
 Publications find Euclidean distance metric better than cosine distance in ChromaDB[11] and for embeddings in general[12]. This is the default for ChromaDB.
 
-ChromaDb's query() method does not offer filtering based on distance but we do it after words.
+## Number of results
+
+ChromaDB's query() method has a parameter for this. I set a default value without tuning.
+
+## Maximum distance
+
+ChromaDb's query() method does not offer filtering based on distance but we do it after words. The default value is set without tuning.
 
 
 # Language model
@@ -114,7 +120,7 @@ The cheapest and almost as good would be a locally-run `Llama3` model.
 - Tune max distance for retrieval
 - Split only large chunks?
 - Easily configurable LLM, DB and embedding function?
-- Use Llama3 LLM
+- Use Llama3 LLM locally
 
 
 [1]: https://ann-benchmarks.com
