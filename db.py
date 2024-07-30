@@ -5,12 +5,12 @@ import chromadb
 import datasets
 
 import data
-from emmbedding_functions.glove import GloveEmbeddingFunction
+from embedding_functions.glove import GloveEmbeddingFunction
 
 
 DATASET_ID = 'TaylorAI/pubmed_noncommercial'
-#NAME = 'pubmed-noncommercial'
-NAME = 'test'
+NAME = 'pubmed-noncommercial'
+#NAME = 'test'
 CONTEXT_NUM_DOCS = 15
 MAX_DISTANCE = 0.9
 
@@ -46,7 +46,7 @@ class ChromaDb(VectorDb):
     def ingest(self):
         collection = self.client.get_or_create_collection(
             self.name,
-            embedding_function=GloveEmbeddingFunction()
+            #embedding_function=GloveEmbeddingFunction()
         )
         previously_ingested_ids = set(
             s.split('_')[0] 
