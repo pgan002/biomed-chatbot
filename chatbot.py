@@ -9,7 +9,7 @@ from db import VectorDb, ChromaDb, DATASET_ID, NAME as DB_NAME
 MODEL_NAME = 'gpt-4o-mini'
 NUM_RETRIEVAL_RESULTS = 50
 MODEL_PROMPT_TEMPLATE = """You are a biomedical scientist.
-Below some information and a question at the end. The information may be relevant to answering the question. If it is relevant, use it to answer the question and quote the most relevant parts. If none of the information is relevant, say "I cannot find any relevant information" and do not make up an answer.
+Below is some information and a question at the end. Some of it may be relevant to the question. If so, use it to answer the question and quote the relevant parts. If none of the information is relevant, ignore it and say "I cannot find relevant information.". If you know the answer without any of the information, start your answer with "From my general knowledge:". But if you do not know, say "I do not know" and do not make up an answer.
 
 Information:
 
