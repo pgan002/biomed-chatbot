@@ -60,7 +60,8 @@ We start with OpenAI's `gpt-4o-mini`. It is affordable, small and intelligent. C
 ✓ Pass retrieved context to model
 - Tune retrieved set size
 - Split large chunks
-- Factor our chatbor class
+- Factor our chatbot class
+- Filter retrieved documents based on distance from query
 - Document usage
 - Code and try GloVe embedding
 
