@@ -15,7 +15,7 @@ CHINK_MIN_CHARS = 32
 CHUNK_MAX_CHARS = 2048
 CONTEXT_NUM_DOCS = 15
 CHUNK_AVERAGE_NUM_TOKENS = 174
-
+MIN_DISTANCE = 0.9
 
 nltk.download('punkt')
 
@@ -123,10 +123,15 @@ class ChromaDb(VectorDb):
             return -1
         return (collection.metadata or {}).get('last_doc_ix', -1)
     
-    def query(self, text: str, n_results: int) -> List[str]:
+    def query(self, text: str, max_results: int, min_distance: float = MIN_DISTANCE) -> List[str]:
         collection = self.client.get_collection(name=self.name)
-        response = collection.query(query_texts=[text], n_results=n_results)
-        return response['documents'][0]
+        response = collection.query(query_texts=[text], n_results=max_results)
+        close_docs = [
+            s 
+            for s, d in zip(response['documents'][0], response['distances'])
+            if d <= max_distance
+        ]
+        return close_results 
 
     def delete(self):
         super().delete()
@@ -141,6 +146,7 @@ if __name__ == '__main__':
     last_doc_ix = db.get_last_doc_ix()
     if last_doc_ix >= 0:
         print(f'Collection {db.name} last ingested document {last_doc_ix}.')
+        print('Choose:')
         print(f'[a]ppend, starting at dataset document {1 + last_doc_ix}')
         print(f'[d]elete (replace) the collection')
         if input('(a/d)? ').lower() == 'd':
