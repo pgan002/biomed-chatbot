@@ -1,3 +1,4 @@
+from abc import ABC, abstractmethod
 from typing import List, Optional
 
 from openai import OpenAI
@@ -15,12 +16,25 @@ Information:
 {context}
 """
 
-class BiomedRAG:
+class BiomedRag(ABC):
+    @abstractmethod
+    def _query_model(self, prompt: str) -> List[str]:
+        pass
+    
+    def query(self, user_query: str) -> List[str]:
+        context_docs = self.db.query(user_query, NUM_RETRIEVAL_RESULTS)
+        model_prompt = MODEL_PROMPT_TEMPLATE.format( 
+            context='\n\n'.join(context_docs)
+        )
+        return self._query_model(model_prompt)
+
+
+class OpenAiBiomedRAG(BiomedRag):
     def __init__(self, db: VectorDb):
         self.db = db
         self.client = OpenAI()
 
-    def _query_llm(self, prompt: str) -> List[str]:
+    def _query_model(self, prompt: str) -> List[str]:
         response = self.client.chat.completions.create(
             model=MODEL_NAME,
             messages=[
@@ -36,17 +50,10 @@ class BiomedRAG:
         )
         return [c.message.content for c in response.choices]
 
-    def query(self, user_query: str) -> List[str]:
-        context_docs = self.db.query(user_query, NUM_RETRIEVAL_RESULTS)
-        model_prompt = MODEL_PROMPT_TEMPLATE.format( 
-            context='\n\n'.join(context_docs)
-        )
-        return self._query_llm(model_prompt)
-
 
 if __name__ == '__main__':
     db = ChromaDb(DB_NAME, dataset_id=DATASET_ID)
-    rag = BiomedRAG(db)
+    rag = OpenAiBiomedRag(db)
     print('Type a biomedical question\n')
     try:
         while True:
