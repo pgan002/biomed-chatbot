@@ -4,6 +4,9 @@ from typing import List, Optional
 import nltk
 
 
+CHUNK_MIN_CHARS = 32
+CHUNK_MAX_CHARS = 2048
+
 nltk.download('punkt')
 
 
@@ -29,7 +32,7 @@ def clean_and_chunk(text: str) -> List[str]:
     else:
         chunks = [text]
     chunks = list(chain(*(nltk.tokenize.sent_tokenize(c) for c in chunks)))
-    chunks = [x for x in chunks if len(x) >= CHINK_MIN_CHARS]
+    chunks = [x for x in chunks if len(x) >= CHUNK_MIN_CHARS]
     # TODO: Split or join consecutive chunks depending on size
     return chunks
 

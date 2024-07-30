@@ -11,10 +11,7 @@ from util.glove_embedding_function import GloveEmbeddingFunction
 DATASET_ID = 'TaylorAI/pubmed_noncommercial'
 #NAME = 'pubmed-noncommercial'
 NAME = 'test'
-CHINK_MIN_CHARS = 32
-CHUNK_MAX_CHARS = 2048
 CONTEXT_NUM_DOCS = 15
-CHUNK_AVERAGE_NUM_TOKENS = 174
 MAX_DISTANCE = 0.9
 
 
