@@ -2,11 +2,11 @@ from abc import ABC, abstractmethod
 from itertools import chain
 from typing import List, Optional
 
-import nltk
-
 import chromadb
 import datasets
+import nltk
 
+from glove import Glove
 
 DATASET_ID = 'TaylorAI/pubmed_noncommercial'
 #NAME = 'pubmed-noncommercial'
@@ -69,7 +69,7 @@ class VectorDb(ABC):
 class ChromaDb(VectorDb):
     def __init__(self, name: str = NAME, dataset_id: str = DATASET_ID):
         super().__init__(name, dataset_id)
-        self.client = chromadb.PersistentClient()
+        self.client = chromadb.PersistentClient(embedding_function=Glove())
     
     def ingest(self):
         collection = self.client.get_or_create_collection(self.name)
@@ -123,7 +123,11 @@ class ChromaDb(VectorDb):
             return -1
         return (collection.metadata or {}).get('last_doc_ix', -1)
     
-    def query(self, text: str, max_results: int, min_distance: float = MIN_DISTANCE) -> List[str]:
+    def query(
+        self, text: str, 
+        max_results: int, 
+        min_distance: float = MIN_DISTANCE
+    ) -> List[str]:
         collection = self.client.get_collection(name=self.name)
         response = collection.query(query_texts=[text], n_results=max_results)
         close_docs = [
