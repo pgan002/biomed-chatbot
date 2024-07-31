@@ -115,7 +115,7 @@ class ChromaDb(AbstractVectorDb):
         close_results = [
             s 
             for s, d in zip(response['documents'][0], response['distances'][0])
-            #if d <= max_distance
+            if d <= max_distance
         ]
         return close_results 
 
