@@ -112,10 +112,10 @@ class ChromaDb(AbstractVectorDb):
     ) -> List[str]:
         collection = self.client.get_collection(name=self.name)
         response = collection.query(query_texts=[text], n_results=max_results)
-        close_docs = [
+        close_results = [
             s 
-            for s, d in zip(response['documents'][0], response['distances'])
-            if d <= max_distance
+            for s, d in zip(response['documents'][0], response['distances'][0])
+            #if d <= max_distance
         ]
         return close_results 
 
