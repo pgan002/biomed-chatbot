@@ -9,7 +9,7 @@ from db import AbstractVectorDb, ChromaDb, DATASET_ID, NAME as DB_NAME
 MODEL_NAME = 'gpt-4o-mini'
 NUM_RETRIEVAL_RESULTS = 50
 MODEL_PROMPT_TEMPLATE = """You are a biomedical scientist.
-Below is some information and a question at the end. Some of it may be relevant to the question. If so, use it to answer the question and quote the relevant parts. If none of the information is relevant, ignore it and say "I cannot find relevant information.". If you know the answer without any of the information, start your answer with "From my general knowledge:". But if you do not know, say "I do not know" and do not make up an answer.
+Below is some information and a question at the end. Use it to answer the question and quote the relevant parts. If none of the information is relevant, ignore it and say "I cannot find relevant information.". Do not make up an answer.
 
 Information:
 
@@ -21,8 +21,12 @@ class BiomedRAG(ABC):
     def _query_model(self, prompt: str) -> List[str]:
         pass
     
-    def query(self, user_query: str) -> List[str]:
-        context_docs = self.db.query(user_query, NUM_RETRIEVAL_RESULTS)
+    def query(
+        self, 
+        user_query: str, 
+        num_retrieval_results: int = NUM_RETRIEVAL_RESULTS
+    ) -> List[str]:
+        context_docs = self.db.query(user_query, num_retrieval_results)
         model_prompt = MODEL_PROMPT_TEMPLATE.format( 
             context='\n\n'.join(context_docs)
         )
