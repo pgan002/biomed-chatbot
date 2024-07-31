@@ -45,6 +45,93 @@ After (enough) documents are ingested, start the chatbot by running:
 ```
 python chatbot.py
 ```
+### Example 1
+
+Prompt:
+
+```
+You are a biomedical scientist.
+Below is some information and a question at the end. Use it to answer the question and quote the relevant parts. If none of the information is relevant, ignore it and say "I cannot find relevant information.". Do not make up an answer.
+```
+
+`CONTEXT_NUM_DOCS` = 50
+`MAX_DISTANCE` = 0.5
+
+Interaction:
+
+```
+python chatbot.py 
+[nltk_data] Downloading package punkt to /home/philip/nltk_data...
+[nltk_data]   Package punkt is already up-to-date!
+Vector DB: ChromaDb
+Collection: "pubmed-noncommercial"
+Embedding: ONNXMiniLM_L6_V2
+Type a biomedical question
+
+> What is the effect of sleep on memory?
+Several lines of evidence indicate that sleep plays a crucial role in memory consolidation. "Sleep promotes memory consolidation" and "post-learning sleep enhances memory recall." Studies specifically highlight that sleep helps to protect memories from interference and supports their organization, enhancing performance and creativity. 
+
+During sleep, particularly during non-rapid eye movement (NREM) sleep, memories are thought to be reactivated and transferred from the hippocampus to cortical networks, which strengthens and solidifies the memory traces established during learning. "A possible mechanism by which memories could be gradually strengthened is their reactivation during sleep." 
+
+Furthermore, sleep quality and the amount of different sleep stages can significantly affect memory performance. It has been noted that "the amount of SWS (slow-wave sleep) might be particularly important for consolidation of declarative information during sleep." 
+
+Overall, poor sleep has been associated with cognitive dysfunctions, including impairments in attention and memory, highlighting the importance of adequate sleep for effective cognitive functioning.
+```
+
+### Example 2
+
+Prompt:
+
+```
+You are a biomedical scientist.
+Below is some information and a question at the end. Some of it may be relevant to the question. If so, use it to answer the question and quote the relevant parts. If none of the information is relevant, ignore it and say "I cannot find relevant information.". If you know the answer without any of the information, start your answer with "From my general knowledge:". But if you do not know, say "I do not know" and do not make up an answer.
+```
+
+`CONTEXT_NUM_DOCS` = 50
+`MAX_DISTANCE` = 0.5
+
+Interaction:
+
+```
+python chatbot.py 
+> What is the effect of sleep on memory?
+From my general knowledge: Sleep plays a crucial role in memory consolidation, which is the process of transforming new information into stable long-term memories. During sleep, particularly during slow-wave sleep (SWS) and rapid eye movement (REM) sleep, the brain reactivates and reorganizes memories, facilitating their transfer from the hippocampus to the neocortex for long-term storage. This reactivation enhances the neural connections associated with newly learned information, making it easier to recall later.
+
+Furthermore, lacking adequate sleep can significantly impair cognitive functions, particularly those related to memory. Sleep deprivation has been shown to negatively affect attention, learning, and memory retention, especially for tasks that are dependent on the hippocampus. Overall, sufficient high-quality sleep is crucial for both the retention and enhancement of various types of memory, including declarative and procedural memory.
+```
+
+### Example 3
+
+Prompt:
+
+```
+You are a biomedical scientist.
+Below is some information and a question at the end. Use it to answer the question and quote the relevant parts. If none of the information is relevant, ignore it and say "I cannot find relevant information.". Do not make up an answer.
+```
+
+`CONTEXT_NUM_DOCS` = 10
+`MAX_DISTANCE` = 0.9
+
+Interaction:
+
+```
+ What is the effect of sleep on memory?
+Sleep plays a crucial role in memory consolidation, which is the process by which newly acquired information is transformed into a stable and long-lasting memory. Several key points from the information provided highlight this relationship:
+
+1. **Memory Consolidation and Sleep**: "Several lines of evidence indicate that sleep promotes memory consolidation." This suggests that sleep enhances the ability to retain and recall learned information.
+
+2. **Neuronal Activity During Sleep**: During sleep, particularly in the non-rapid eye movement (NREM) phase, there is reactivation of memory traces, which aids in the transfer of memories from the hippocampus to neocortex for long-term storage. "A possible mechanism by which memories could be gradually strengthened is their reactivation during sleep."
+
+3. **Benefits of Sleep on Memory Performance**: Lack of sleep is associated with memory impairments, especially in tasks reliant on the hippocampus. "Many studies have examined the consequences of lack of sleep on memory, reporting that sleep-deprived animals and humans show memory impairments in hippocampal-dependent but not hippocampal-independent tasks."
+
+4. **Sleep Stages**: Specific sleep stages are associated with different types of memory consolidation. "SWS (slow-wave sleep) has been linked primarily to learning and memory, particularly declarative memory." This indicates that SWS is particularly beneficial for retaining factual information and events.
+
+5. **Targeted Memory Reactivation**: Studies have shown that external cues presented during sleep can improve memory consolidation. "Triggering reactivation processes during sleep by re-exposure to associated memory cues (targeted memory reactivation [TMR]) has been shown to improve memory consolidation."
+
+6. **Effects of Sleep Distribution**: The distribution of sleep, such as incorporating naps, can also impact cognitive performance positively. "This suggests that under conditions of chronic sleep restriction, a split sleep schedule may optimize the cognitive and neurophysiological functions that underpin some aspects of learning."
+
+In summary, sleep is essential for effective memory consolidation and retention, with specific sleep stages playing pivotal roles in these processes. Insufficient sleep can lead to cognitive impairments, particularly affecting memory tasks dependent on the hippocampus.
+```
 
 # Data
 
