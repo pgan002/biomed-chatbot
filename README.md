@@ -1,6 +1,10 @@
-# Usage
+# Biomedical chatbot
 
-## Setup
+This is a chatbot for answering biomedical questions based on relevant publications. It is implemented as a retrieval-augmented generation system (RAG).
+
+## Usage
+
+### Setup
 
 1. Install python3.10
 1. Then run:
@@ -18,7 +22,7 @@ replacing the actual key in the last line
 
 If you want to use the GloVe embedding (fast) instead of the deep (better) one, download the pre-trained GloVe embedding file from [13].
 
-## Storing documents
+### Storing documents
 
 To download and ingest data into the database, run
 
@@ -39,13 +43,13 @@ See the discussion under section "Embedding".
 If ingestion is interrupted and restarted, it knows from which input document to resume.
 
 
-## Querying the chatbot
+### Querying the chatbot
 
 After (enough) documents are ingested, start the chatbot by running:
 ```
 python chatbot.py
 ```
-### Example 1
+#### Example 1
 
 Prompt:
 
@@ -78,7 +82,7 @@ Furthermore, sleep quality and the amount of different sleep stages can signific
 Overall, poor sleep has been associated with cognitive dysfunctions, including impairments in attention and memory, highlighting the importance of adequate sleep for effective cognitive functioning.
 ```
 
-### Example 2
+#### Example 2
 
 Prompt:
 
@@ -100,7 +104,7 @@ From my general knowledge: Sleep plays a crucial role in memory consolidation, w
 Furthermore, lacking adequate sleep can significantly impair cognitive functions, particularly those related to memory. Sleep deprivation has been shown to negatively affect attention, learning, and memory retention, especially for tasks that are dependent on the hippocampus. Overall, sufficient high-quality sleep is crucial for both the retention and enhancement of various types of memory, including declarative and procedural memory.
 ```
 
-### Example 3
+#### Example 3
 
 Prompt:
 
@@ -133,7 +137,7 @@ Sleep plays a crucial role in memory consolidation, which is the process by whic
 In summary, sleep is essential for effective memory consolidation and retention, with specific sleep stages playing pivotal roles in these processes. Insufficient sleep can lead to cognitive impairments, particularly affecting memory tasks dependent on the hippocampus.
 ```
 
-# Data
+## Data
 
 As suggested in the task description, we use the PubMed articles with a non-commercial license: `TaylorAI/pubmed_noncommercial`, ~60GB in text.
 It contains 1,438,313 articles.
@@ -141,7 +145,7 @@ It contains 1,438,313 articles.
 Most of the articles are formatted with separate header, body and reference sections. Only the body contains biomedical information. The publication year and author names contained in the header section can be useful for answering questions, but is difficult to parse using simple tools and too expensive and slow using a language model. The references can be useful in chain-of-thought reasoning but this would be difficult.
 
 
-# Cleaning and chunking
+## Cleaning and chunking
 
 When possible, we extract the article bodies and chunk them into paragraphs. Paragraphs and sentences are more semantically coherent than fixed-size chunks, even if those overlap. Sentences may contain too little context. The optimum chunk size depends on the embedding type, because with simple embeddings such as Glove, large chunks would become too general to be useful. I did not tune the think size because it would require a lot of work and because I cannot evaluate retrieved results (I do not know biomedicine).
 
@@ -155,7 +159,7 @@ The first data file's chunks add up to 1291381114 chars (696 chars/chunk). At ab
 -- Tokens/chunk: 189
 
 
-# Vector DB
+## Vector DB
 
 We use Chroma because it is simple to use and sufficient for demo purposes.
 
@@ -170,7 +174,7 @@ We use Chroma because it is simple to use and sufficient for demo purposes.
 
 The main difficulty with storing the documents for retrieval is the time to vectorize and index so much text. Vectorization speed depends on the choice of embedding function, indexing speed on the indexing algorithm in the database (hard-coded). I found anecdotal information and ingestion speed measurements for one or two vector databases, so it is difficult to compare.
 
-# Embedding
+## Embedding
 
 There are many possible embedding functions. ChromaDB predefines some and supports a custom ones.[8] Various benchmarks rank embedding functions[9]. Most of those are large models that will take long. Local models tend to be faster than web-hosted models due to network latency[10].
 
@@ -187,29 +191,29 @@ Other AI providers also host embedding models, sometimes cheaper, but no batchin
 Instead, I implemented document embedding via averaged Glove word embeddings.
 
 
-# Retrieval
+## Retrieval
 
-## Distance metric
+### Distance metric
 
 Publications find Euclidean distance metric better than cosine distance in ChromaDB[11] and for embeddings in general[12]. This is the default for ChromaDB.
 
-## Number of results
-
-ChromaDB's query() method has a parameter for this. I set a default value without tuning.
-
-## Maximum distance
+### Maximum distance
 
 ChromaDb's query() method does not offer filtering based on distance but we do it after words. The default value is set without tuning.
 
+### Number of results
 
-# Language model
+ChromaDB's query() method has a parameter for this. I set a default value without tuning.
+
+
+## Language model
 
 We start with OpenAI's `gpt-4o-mini`. It is the cheapest and smallest among the best models available today. Context size 128K tokens. Pricing: $0.150 /1M input tokens, $0.600 /1M output tokens. Cheap enough for development and demo.
 
 The cheapest and almost as good would be a locally-run `Llama3` model.
 
 
-# TODO
+## TODO
 
 - Document an example for "What is the effect of sleep on memory?"
 - Tune retrieved set size
